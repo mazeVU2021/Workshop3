@@ -9,4 +9,16 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-**Test**
+```{r}
+#generate R chunk
+library(tidyverse)
+
+survey <- read_csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2021/2021-05-18/survey.csv')
+
+#write_csv(survey,file="survey_data.csv")
+write_csv(survey,"survey_data.csv")
+
+
+```
+
+
