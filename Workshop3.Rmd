@@ -32,21 +32,117 @@ survey%>%skim()
 survey%>%
   filter(country=="Australia")
 
-
 survey_IT_au<-survey%>%
   filter(country=="Australia" | country=="australia" | country=="Australi")%>%
   filter(industry=="Computing or Tech" & annual_salary>80000)
+
+
+
+
+
+survey%>%
+  filter(gender!="Man")
 ```
 
-#### Select
+#### Select -- selecting variables rather than observations
 
 ```{r}
 survey_IT_au %>%
   select(how_old_are_you, job_title, annual_salary)%>%
-  arrange(annual_salary)
-
+  arrange(desc(annual_salary))
 
 survey_IT_au%>%
   select(-industry)
+
+survey%>%count(state)
+
+
+
+
+
+# TO KNOW HOW MANY INDUSTRIES I HAVE IN MY DATASET
+survey%>%
+  distinct(industry)
+
+survey%>%
+  #count(industry, gender, sort=TRUE)
+  count(gender, industry, sort=TRUE)
+
+survey_IT_au%>%
+  distinct(industry)
+  
+survey_IT_au%>%  
+  count(gender, city, sort = TRUE)
+
+survey_IT_au%>%  
+  count(highest_level_of_education_completed, sort = TRUE)
+  
+survey_IT_au%>%
+  count(annual_salary, job_title, sort=TRUE)
+
+survey_IT_au%>%add_count(highest_level_of_education_completed, sort = TRUE)
+```
+
+
+
+
+
+
+#### MUTATE -- add columns and keep the original ones (different from add_count because it changes your dataset) vs TRANSMUTE
+```{r}
+
+class(survey_IT_au$annual_salary)
+class(survey_IT_au$other_monetary_comp)
+
+survey_IT_au%>%
+  #mutate(total_salary=annual_salary+other_monetary_comp)
+  mutate(avr_salary=mean(annual_salary))
+
+# IF YOU WANT TO KEEP THIS NEW DATA IN YOUR DATASET
+survey_IT_auB <- survey_IT_au%>%mutate(avr_salary=mean(annual_salary))
+
+
+survey_IT_auB%>%
+  mutate(max_salary=max(annual_salary))%>%
+  select(how_old_are_you, job_title, city, annual_salary, avr_salary, max_salary)
+
+# GROUP YOUR DATASET BY CITY
+survey_IT_au_grouped<-survey_IT_auB%>%
+  group_by(city)%>%
+  mutate(max_salary=max(annual_salary))%>%
+  select(how_old_are_you, job_title, city, annual_salary, avr_salary, max_salary)
+
+survey_IT_auB%>%count(city)
+
+# if you're not going to use this later, dont forget to ungroup it
+survey_IT_au_grouped<-survey_IT_auB%>%
+  group_by(city)%>%
+  mutate(max_salary=max(annual_salary))%>%
+  ungroup()
+
+# summarise - you shrink your dataset, it looks at the whole dataset and collapses it
+survey_IT_auB%>%
+  summarise(min_salary=min(annual_salary))
+
+survey_IT_auB%>%
+  group_by(gender)%>%
+  summarise(min_salary=min(annual_salary))
+
+survey_IT_auB%>%
+  group_by(gender, city)%>%
+  summarise(min_salary=min(annual_salary),
+            max_salary=max(annual_salary),
+            avr_salary=mean(annual_salary))%>%
+  #arrange(desc(min_salary))
+  arrange(desc(avr_salary))%>%
+  ungroup()          ## dont forget to ungroup
+
+survey_IT_auC<-survey_IT_auB%>%
+  mutate(age = parse_number(how_old_are_you))  # takes the first number in a range
+
+# case_when() allows us to work with variables
+# create a new variable based on a condition
+survey_IT_auC%>%
+  mutate(Business_Analyst = case_when(job_title == "Business Analsyt" ~ "Yes", T ~ "No"))
 ```
 
